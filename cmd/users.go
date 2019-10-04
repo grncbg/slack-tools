@@ -2,10 +2,14 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/nlopes/slack"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+var bots bool
 
 // usersCmd represents the users command
 var usersCmd = &cobra.Command{
@@ -14,7 +18,19 @@ var usersCmd = &cobra.Command{
 	Long:  `show users`,
 	Run: func(cmd *cobra.Command, args []string) {
 		token := viper.GetString("token")
-		fmt.Print(token)
+		client := slack.New(token)
+
+		users, err := client.GetUsers()
+		if err != nil {
+			fmt.Fprint(os.Stderr, err)
+			return
+		}
+
+		for _, u := range users {
+			if bots || (!(u.IsBot || u.IsAppUser) && u.Name != "slackbot") {
+				fmt.Println(u.Name)
+			}
+		}
 	},
 }
 
@@ -30,4 +46,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// usersCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	usersCmd.Flags().BoolVarP(&bots, "bots", "b", false, "with bots")
 }
