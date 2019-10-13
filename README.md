@@ -16,7 +16,7 @@ And set slack token to config file.
 #### Example
 ~/.slack-tools.toml
 ```TOML
-token = SLACK_TOKEN
+token = "SLACK_TOKEN"
 ```
 
 ### Useage
